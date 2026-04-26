@@ -136,8 +136,10 @@ export async function fetchReportDetail(id: string): Promise<ReportDetail | null
       [apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report/${id}`)],
     );
   }
+  // Both api.core and api.core-tyo1 block CORS for detail on non-official origins; use built-in proxy.
+  const detailUrl = `https://api.core.exptech.dev/api/v2/eq/report/${id}`;
   return fetchWithTimeout<ReportDetail>(
-    apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report/${id}`),
+    `${PROXY_BASE}?url=${encodeURIComponent(detailUrl)}`,
     5000,
   );
 }
