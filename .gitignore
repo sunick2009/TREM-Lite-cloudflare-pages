@@ -131,3 +131,11 @@ dist
 
 # Miscellaneous
 .DS_Store
+# Claude Code memory
+.claude/
+
+# Wrangler local state
+.wrangler/
+
+# Playwright test results
+test-results/
