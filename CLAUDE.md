@@ -119,31 +119,15 @@ Tooltip 測試策略：透過 `window.__map` 取得地圖，用 `getSource('rts'
 
 ---
 
-## 尚未實作（Phase 2）
+## Phase 2 實作狀態
 
-- [ ] 音效設定 UI（已有 AudioController，無設定介面）
-- [ ] EEW P/S wave 動畫（CSS 已備，邏輯待補）
-- [ ] LPGM 圖層（資料有 fetch，layer 未加）
+- [x] EEW P/S wave 動畫 — 已完整實作於 `src-web/components/EewBox.ts`
+- [x] LPGM 圖層 — `src-web/components/MapManager.ts`（LpgmRelease 事件 + lpgm-markers layer）
+- [x] 音效設定 UI — AudioController soundEffects guard + Settings.ts 音效細項 checkboxes
+- [x] 瀏覽器定位 API — `src-web/services/geoLocation.ts` + MapManager user-location layer
 - [ ] 離線支援最佳化（Service Worker precache 已設定）
 - [ ] 響應式行動版調整
-- [ ] 瀏覽器定位 API 整合（Geolocation）
 
-### 瀏覽器定位 API（待實作）
-
-透過 `navigator.geolocation` 取得使用者座標，在地圖上顯示當前位置，並自動比對所在行政區。
-
-**預計功能：**
-- 地圖上顯示定位點（藍色脈衝標記，類似 Google Maps）
-- 自動比對 `data/region.json` 找出最近的行政區代碼，設定為使用者所在地
-- 所在地用於 EEW 警報的震度預估（顯示「您的位置預估震度 X 級」）
-- NavBar 加入定位按鈕（`🎯` 或類似圖示），點擊後觸發定位或移動視角至定位點
-- 定位失敗（拒絕授權、逾時）需有 graceful fallback，不影響主功能
-
-**實作建議：**
-- 新增 `src-web/services/geoLocation.ts`，封裝 `watchPosition` + 誤差過濾邏輯
-- 定位點 layer 加在 `MapManager.ts`（source: `user-location`，type: `circle`）
-- 行政區比對用 `search_loc_name` / 現有 region 資料，避免額外 API 呼叫
-- HTTPS 限制：Cloudflare Pages 已是 HTTPS，localhost dev 也符合（瀏覽器允許 localhost geolocation）
 
 ### WebSocket 即時連線（重要，待實作）
 

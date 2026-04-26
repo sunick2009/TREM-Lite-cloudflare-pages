@@ -16,21 +16,29 @@ export function initAudioController(): void {
   const audio = AudioManager.getInstance();
 
   events.on<EewData>('EewRelease', (ans) => {
-    audio.playEewRelease(ans.data.status);
+    const cfg = getConfig();
+    if (ans.data.status === 1) {
+      if (cfg.notification.soundEffects.EEW2) audio.playEewRelease(ans.data.status);
+    } else {
+      if (cfg.notification.soundEffects.EEW) audio.playEewRelease(ans.data.status);
+    }
     ttsCache[ans.data.id] = {
       last: { loc: '', i: -1 },
       now: { loc: ans.data.eq.loc, i: ans.data.eq.max },
     };
-    const cfg = getConfig();
     notification.sendNotification(
       `${ans.data.status === 1 ? '🚨 緊急地震速報' : '⚠️ 地震速報'} ${ans.data.serial}報`,
       { body: `${formatTimestamp(ans.data.eq.time)} 最大預估 ${intensity_list[ans.data.eq.max]}\n${ans.data.eq.loc} M${ans.data.eq.mag} ${ans.data.eq.depth}km` },
     );
   });
 
-  events.on<EewData>('EewAlert', (ans) => audio.playEewAlert());
+  events.on<EewData>('EewAlert', () => {
+    const cfg = getConfig();
+    if (cfg.notification.soundEffects.EEW2) audio.playEewAlert();
+  });
   events.on<EewData>('EewUpdate', (ans) => {
-    audio.playEewUpdate();
+    const cfg = getConfig();
+    if (cfg.notification.soundEffects.Update) audio.playEewUpdate();
     if (ttsCache[ans.data.id]) {
       ttsCache[ans.data.id].now.loc = ans.data.eq.loc;
       ttsCache[ans.data.id].now.i = ans.data.eq.max;
@@ -43,25 +51,25 @@ export function initAudioController(): void {
   events.on<EewData>('EewCancel', () => audio.playEewCancel());
   events.on<EewData>('EewEnd', (ans) => { delete ttsCache[ans.data.id]; });
 
-  events.on('RtsPga2', () => audio.playRtsPga2());
-  events.on('RtsPga1', () => audio.playRtsPga1());
+  events.on('RtsPga2', () => { if (getConfig().notification.soundEffects.PGA2) audio.playRtsPga2(); });
+  events.on('RtsPga1', () => { if (getConfig().notification.soundEffects.PGA1) audio.playRtsPga1(); });
   events.on('RtsShindo2', () => {
-    audio.playRtsShindo2();
+    if (getConfig().notification.soundEffects.Shindo2) audio.playRtsShindo2();
     notification.sendNotification(`🟥 強震檢測 [${formatTimestamp(now())}]`, { body: '請注意今後的資訊。' });
   });
   events.on('RtsShindo1', () => {
-    audio.playRtsShindo1();
+    if (getConfig().notification.soundEffects.Shindo1) audio.playRtsShindo1();
     notification.sendNotification(`🟧 震動檢測 [${formatTimestamp(now())}]`, { body: '請注意今後的資訊。' });
   });
   events.on('RtsShindo0', () => {
-    audio.playRtsShindo0();
+    if (getConfig().notification.soundEffects.Shindo0) audio.playRtsShindo0();
     notification.sendNotification(`🟩 弱反應 [${formatTimestamp(now())}]`, { body: '請注意今後的資訊。' });
   });
   events.on('TsunamiRelease', () => audio.playTsunami());
 
   events.on<ReportListItem>('ReportRelease', (ans) => {
-    audio.playReport();
     const cfg = getConfig();
+    if (cfg.notification.soundEffects.Report) audio.playReport();
     if (!cfg.notification.speech) return;
 
     const item = ans.data;
@@ -83,8 +91,8 @@ export function initAudioController(): void {
   });
 
   events.on<IntensityData>('IntensityRelease', (ans) => {
-    audio.playIntensity();
     const cfg = getConfig();
+    if (cfg.notification.soundEffects.PAlert) audio.playIntensity();
     const result = findMaxIntensityCity(ans.data.area);
     if (!result) return;
     const text = int_to_string(result.intensity).replace('級', '');
@@ -95,8 +103,8 @@ export function initAudioController(): void {
   });
 
   events.on<LpgmData>('LpgmRelease', (ans) => {
-    audio.playIntensity();
     const cfg = getConfig();
+    if (cfg.notification.soundEffects.PAlert) audio.playIntensity();
     const station = getStation();
     if (!station) return;
 

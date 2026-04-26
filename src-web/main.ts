@@ -15,6 +15,7 @@ import { initReportList } from './components/ReportList.ts';
 import { initNavBar } from './components/NavBar.ts';
 import { initAudioController } from './components/AudioController.ts';
 import { initSettings } from './components/Settings.ts';
+import { startGeolocation } from './services/geoLocation.ts';
 
 async function main(): Promise<void> {
   console.log('[TREM Web] Starting...');
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
 
   // Init UI components (before map so elements exist)
   initNavBar();
+  startGeolocation();
   initSettings();
   initRtsList();
   initReportList();

@@ -55,6 +55,20 @@ function injectSettingsPanel(): void {
         </section>
 
         <section class="settings-section">
+          <h3>音效細項</h3>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-eew"><span>地震速報 (預警)</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-eew2"><span>緊急地震速報 (警報)</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-update"><span>速報更新</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-report"><span>地震報告</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-palert"><span>震度速報 / 長週期地震動</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-pga1"><span>RTS PGA 一級</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-pga2"><span>RTS PGA 二級</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-shindo0"><span>RTS 震度 弱反應</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-shindo1"><span>RTS 震度 震動檢測</span></label>
+          <label class="checkbox-row"><input type="checkbox" id="s-sfx-shindo2"><span>RTS 震度 強震檢測</span></label>
+        </section>
+
+        <section class="settings-section">
           <h3>所在地</h3>
           <label>位置代碼 (location-code)
             <input type="number" id="s-location-code" min="0" max="999">
@@ -130,7 +144,11 @@ function injectSettingsPanel(): void {
   for (const id of ['s-api-domain', 's-location-code', 's-station-id']) {
     panel.querySelector(`#${id}`)?.addEventListener('change', saveSettings);
   }
-  for (const id of ['s-use-proxy', 's-sound', 's-speech', 's-show-trem-eew', 's-show-fault']) {
+  for (const id of [
+    's-use-proxy', 's-sound', 's-speech', 's-show-trem-eew', 's-show-fault',
+    's-sfx-eew', 's-sfx-eew2', 's-sfx-update', 's-sfx-report', 's-sfx-palert',
+    's-sfx-pga1', 's-sfx-pga2', 's-sfx-shindo0', 's-sfx-shindo1', 's-sfx-shindo2',
+  ]) {
     panel.querySelector(`#${id}`)?.addEventListener('change', saveSettings);
   }
 }
@@ -174,6 +192,18 @@ function loadSettingsValues(): void {
   const showFault = el<HTMLInputElement>('s-show-fault');
   if (showFault) showFault.checked = cfg.map.showFault;
 
+  const sfx = cfg.notification.soundEffects;
+  const sfxMap: Array<[string, keyof typeof sfx]> = [
+    ['s-sfx-eew', 'EEW'], ['s-sfx-eew2', 'EEW2'], ['s-sfx-update', 'Update'],
+    ['s-sfx-report', 'Report'], ['s-sfx-palert', 'PAlert'],
+    ['s-sfx-pga1', 'PGA1'], ['s-sfx-pga2', 'PGA2'],
+    ['s-sfx-shindo0', 'Shindo0'], ['s-sfx-shindo1', 'Shindo1'], ['s-sfx-shindo2', 'Shindo2'],
+  ];
+  for (const [id, key] of sfxMap) {
+    const cb = el<HTMLInputElement>(id);
+    if (cb) cb.checked = sfx[key];
+  }
+
   updateNotifStatus();
 
   const unlockBtn = document.getElementById('s-audio-unlock') as HTMLButtonElement | null;
@@ -195,7 +225,20 @@ async function saveSettings(): Promise<void> {
   const showTremEew = el<HTMLInputElement>('s-show-trem-eew')?.checked ?? cfg.display.showTremEew;
   const showFault = el<HTMLInputElement>('s-show-fault')?.checked ?? cfg.map.showFault;
 
-  await patchConfig('notification', { sound, speech: speechEnabled });
+  const sfx = cfg.notification.soundEffects;
+  const sfxMap: Array<[string, keyof typeof sfx]> = [
+    ['s-sfx-eew', 'EEW'], ['s-sfx-eew2', 'EEW2'], ['s-sfx-update', 'Update'],
+    ['s-sfx-report', 'Report'], ['s-sfx-palert', 'PAlert'],
+    ['s-sfx-pga1', 'PGA1'], ['s-sfx-pga2', 'PGA2'],
+    ['s-sfx-shindo0', 'Shindo0'], ['s-sfx-shindo1', 'Shindo1'], ['s-sfx-shindo2', 'Shindo2'],
+  ];
+  const soundEffectsPatch: Partial<typeof sfx> = {};
+  for (const [id, key] of sfxMap) {
+    const cb = el<HTMLInputElement>(id);
+    if (cb) soundEffectsPatch[key] = cb.checked;
+  }
+
+  await patchConfig('notification', { sound, speech: speechEnabled, soundEffects: { ...sfx, ...soundEffectsPatch } as typeof sfx });
   await patchConfig('location', { code: locationCode, stationId });
   await patchConfig('display', { showTremEew });
   await patchConfig('map', { showFault });

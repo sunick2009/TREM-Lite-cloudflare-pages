@@ -1,8 +1,12 @@
 import maplibregl from 'maplibre-gl';
+import type { GeoJSONSource } from 'maplibre-gl';
 import { events } from '@web/services/eventBus.ts';
 import { state } from '@web/services/appState.ts';
 import { COLOR, MAP_CONFIG } from '@web/utils/constants.ts';
-import { createIntensityIcon, createIntensityIconSquare } from '@web/utils/utils.ts';
+import { createIntensityIcon, createIntensityIconSquare, generateMapStyle, getRegionSync, distance } from '@web/utils/utils.ts';
+import { getStation } from '@web/services/stationResource.ts';
+import { getLastPosition } from '@web/services/geoLocation.ts';
+import type { LpgmData, TremEventPayload } from '@web/types/index.ts';
 
 let initError = false;
 
@@ -112,6 +116,66 @@ export async function initMap(delay = 3000): Promise<void> {
         map.fitBounds(MAP_CONFIG.BOUNDS, MAP_CONFIG.OPTIONS);
 
         await loadIcons(map);
+
+        // LPGM markers layer
+        map.addSource('lpgm-markers-geojson', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+          id: 'lpgm-markers', type: 'symbol', source: 'lpgm-markers-geojson',
+          layout: {
+            'icon-image': ['match', ['get', 'i'], 1, 'lpgm-1', 2, 'lpgm-2', 3, 'lpgm-3', 4, 'lpgm-4', 'cross'],
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.3, 10, 0.7],
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          },
+        });
+
+        // User location layer
+        map.addSource('user-location', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+          id: 'user-location-dot', type: 'circle', source: 'user-location',
+          paint: { 'circle-radius': 8, 'circle-color': '#4285f4', 'circle-stroke-width': 2, 'circle-stroke-color': '#fff' },
+        });
+        map.addLayer({
+          id: 'user-location-icon', type: 'symbol', source: 'user-location',
+          layout: { 'icon-image': 'gps', 'icon-size': 0.5, 'icon-allow-overlap': true },
+        });
+
+        events.on<LpgmData>('LpgmRelease', (ans) => {
+          const station = getStation();
+          if (!station) return;
+          const features: GeoJSON.Feature[] = [];
+          const codeIntensity: Record<number, number> = {};
+          for (const s of ans.data.list) {
+            if (!s.lpgm) continue;
+            const info = station[s.id]?.info.at(-1);
+            if (!info) continue;
+            if (!codeIntensity[info.code] || s.lpgm > codeIntensity[info.code]) {
+              codeIntensity[info.code] = s.lpgm;
+            }
+            features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [info.lon, info.lat] }, properties: { i: s.lpgm } });
+          }
+          map.setPaintProperty('town', 'fill-color', generateMapStyle(codeIntensity, false, true));
+          map.setPaintProperty('rts-layer', 'circle-opacity', 0.2);
+          (map.getSource('lpgm-markers-geojson') as GeoJSONSource).setData({ type: 'FeatureCollection', features });
+          setTimeout(() => {
+            map.setPaintProperty('town', 'fill-color', generateMapStyle({}, false, false));
+            map.setPaintProperty('rts-layer', 'circle-opacity', 1);
+            (map.getSource('lpgm-markers-geojson') as GeoJSONSource).setData({ type: 'FeatureCollection', features: [] });
+          }, 15_000);
+        });
+
+        events.on('GeoLocation', (ans) => {
+          const coords = (ans as TremEventPayload<GeolocationCoordinates>).data;
+          (map.getSource('user-location') as GeoJSONSource).setData({
+            type: 'FeatureCollection',
+            features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [coords.longitude, coords.latitude] }, properties: {} }],
+          });
+        });
+
+        events.on('FocusLocation', () => {
+          const pos = getLastPosition();
+          if (pos) map.flyTo({ center: [pos.longitude, pos.latitude], zoom: 10 });
+        });
 
         state.map = map;
         // Expose for debugging and e2e tests
