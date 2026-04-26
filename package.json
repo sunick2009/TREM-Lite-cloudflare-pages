@@ -19,7 +19,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:proxy": "BASE_URL=http://localhost:8788 playwright test --grep \"Proxy\"",
-    "pages:dev": "wrangler pages dev dist --port 8788"
+    "pages:dev": "wrangler pages dev dist --port 8788",
+    "deploy:pages": "npm run build:web && wrangler pages deploy dist"
   },
   "repository": {
     "type": "git",
