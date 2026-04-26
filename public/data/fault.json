@@ -1,0 +1,194 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "山腳斷層", "name_en": "Shanchiao Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.392, 25.195], [121.401, 25.162], [121.410, 25.130],
+          [121.418, 25.098], [121.425, 25.060], [121.430, 25.020]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "新莊斷層", "name_en": "Sinjhuang Fault", "grade": 2 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.415, 25.042], [121.420, 25.020], [121.425, 24.998],
+          [121.428, 24.975]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "新竹斷層", "name_en": "Hsinchu Fault", "grade": 2 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.000, 24.860], [121.015, 24.835], [121.030, 24.810],
+          [121.045, 24.780]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "獅潭斷層", "name_en": "Shitan Fault", "grade": 2 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.980, 24.630], [120.995, 24.600], [121.010, 24.568],
+          [121.025, 24.540]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "大茅埔-雙冬斷層", "name_en": "Dameipo-Shuangtung Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.020, 24.260], [121.035, 24.220], [121.050, 24.180],
+          [121.060, 24.140], [121.070, 24.100]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "車籠埔斷層", "name_en": "Chelungpu Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.818, 24.862], [120.822, 24.820], [120.825, 24.780],
+          [120.830, 24.740], [120.835, 24.700], [120.838, 24.660],
+          [120.840, 24.620], [120.842, 24.580], [120.845, 24.540],
+          [120.850, 24.500], [120.855, 24.460], [120.860, 24.420],
+          [120.865, 24.380], [120.868, 24.340], [120.870, 24.300],
+          [120.875, 24.260], [120.878, 24.220], [120.880, 24.180],
+          [120.882, 24.140], [120.885, 24.100], [120.888, 24.060],
+          [120.890, 24.020], [120.892, 23.980], [120.895, 23.940]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "彰化斷層", "name_en": "Changhua Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.540, 24.200], [120.550, 24.160], [120.558, 24.120],
+          [120.565, 24.080], [120.570, 24.040], [120.575, 24.000],
+          [120.580, 23.960], [120.585, 23.920]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "梅山斷層", "name_en": "Meishan Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.310, 23.690], [120.360, 23.665], [120.410, 23.645],
+          [120.460, 23.630], [120.510, 23.618], [120.560, 23.610],
+          [120.610, 23.605], [120.660, 23.600]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "新化斷層", "name_en": "Xinhua Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.260, 23.120], [120.290, 23.090], [120.320, 23.060],
+          [120.350, 23.030], [120.380, 23.000]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "旗山斷層", "name_en": "Qishan Fault", "grade": 2 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [120.565, 23.010], [120.548, 22.960], [120.535, 22.910],
+          [120.522, 22.860], [120.510, 22.810], [120.500, 22.760]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "米崙斷層", "name_en": "Milun Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.615, 24.032], [121.618, 24.000], [121.620, 23.968],
+          [121.622, 23.935], [121.624, 23.900]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "縱谷斷層 (西)", "name_en": "Longitudinal Valley Fault (West)", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.515, 24.100], [121.505, 24.040], [121.495, 23.980],
+          [121.485, 23.920], [121.475, 23.860], [121.462, 23.800],
+          [121.448, 23.740], [121.435, 23.680], [121.420, 23.620],
+          [121.405, 23.560], [121.388, 23.500], [121.370, 23.440],
+          [121.355, 23.380], [121.340, 23.320], [121.325, 23.260],
+          [121.310, 23.200], [121.295, 23.140], [121.280, 23.080]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "池上斷層", "name_en": "Chishang Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.270, 23.450], [121.268, 23.410], [121.265, 23.370],
+          [121.262, 23.330], [121.260, 23.290], [121.258, 23.250]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "奇美斷層", "name_en": "Chihshang Fault", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.320, 23.260], [121.310, 23.220], [121.300, 23.180],
+          [121.290, 23.140], [121.280, 23.100]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "玉里斷層", "name_en": "Yuli Fault", "grade": 2 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.348, 23.338], [121.340, 23.298], [121.332, 23.258],
+          [121.325, 23.218]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "花東縱谷北段斷層", "name_en": "LVF North", "grade": 1 },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [121.598, 24.162], [121.582, 24.120], [121.568, 24.078],
+          [121.552, 24.036], [121.538, 23.994], [121.522, 23.952],
+          [121.508, 23.910], [121.495, 23.868]
+        ]
+      }
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { COLOR, MAP_CONFIG } from '@web/utils/constants.ts';
 import { createIntensityIcon, createIntensityIconSquare, generateMapStyle, getRegionSync, distance } from '@web/utils/utils.ts';
 import { getStation } from '@web/services/stationResource.ts';
 import { getLastPosition } from '@web/services/geoLocation.ts';
+import { getConfig, onConfigChange } from '@web/services/configStore.ts';
 import type { LpgmData, TremEventPayload } from '@web/types/index.ts';
 
 let initError = false;
@@ -183,6 +184,25 @@ export async function initMap(delay = 3000): Promise<void> {
           const pos = getLastPosition();
           if (pos) map.flyTo({ center: [pos.longitude, pos.latitude], zoom: 10 });
         });
+
+        // Fault lines — loaded from local GeoJSON to avoid CORS
+        map.addSource('fault-geojson', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        map.addLayer({
+          id: 'fault',
+          type: 'line',
+          source: 'fault-geojson',
+          paint: { 'line-color': '#ff6b35', 'line-width': 1.5, 'line-opacity': 0 },
+        });
+        fetch('/data/fault.json')
+          .then((r) => r.json())
+          .then((data) => (map.getSource('fault-geojson') as GeoJSONSource).setData(data))
+          .catch(() => {});
+
+        const applyFaultVisibility = (show: boolean) => {
+          map.setPaintProperty('fault', 'line-opacity', show ? 1 : 0);
+        };
+        applyFaultVisibility(getConfig().map.showFault);
+        onConfigChange((cfg) => applyFaultVisibility(cfg.map.showFault));
 
         state.map = map;
         // Expose for debugging and e2e tests
