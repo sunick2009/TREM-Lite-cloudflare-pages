@@ -9,6 +9,10 @@ import type { ReportListItem, ReportDetail, TremEventPayload } from '@web/types/
 
 const SURVEY_INTENSITY_TIMEOUT = 120_000;
 
+// Persists the last-seen report ID across page reloads (e.g. SW updates).
+// Prevents replaying audio/notification for reports the user already saw.
+const LAST_SEEN_REPORT_KEY = 'trem_last_report_id';
+
 export function initReportList(): void {
   const closeButton = document.getElementById('close-btn')!;
   const reportWrapper = document.querySelector<HTMLElement>('.report-wrapper')!;
@@ -100,7 +104,13 @@ async function refresh(map: maplibregl.Map, container: HTMLElement, scrollbar: H
       state.cache.last_report = list[0];
     }
     state.data.report = list;
-    events.emit('ReportRelease', { info: { type: 0 }, data: list[0] });
+    // Only alert if this report wasn't already seen before the page reload.
+    // Guards against SW-update reloads replaying audio for old reports.
+    const lastSeenId = localStorage.getItem(LAST_SEEN_REPORT_KEY);
+    if (list[0].id !== lastSeenId) {
+      events.emit('ReportRelease', { info: { type: 0 }, data: list[0] });
+      localStorage.setItem(LAST_SEEN_REPORT_KEY, list[0].id);
+    }
   } else if (list.length && list[0].id !== state.data.report[0]?.id) {
     const detail = await fetchReportDetail(list[0].id);
     if (detail) {
@@ -109,6 +119,7 @@ async function refresh(map: maplibregl.Map, container: HTMLElement, scrollbar: H
     }
     state.data.report = list;
     events.emit('ReportRelease', { info: { type: 0 }, data: list[0] });
+    localStorage.setItem(LAST_SEEN_REPORT_KEY, list[0].id);
   } else {
     state.data.report = list;
   }
