@@ -1586,3 +1586,58 @@ body {
 @media (max-height: 635px) {
   .intensity-color-list { display: none !important; }
 }
+
+/* ===== STATION HOVER POPUP ===== */
+.station-popup-wrap .maplibregl-popup-content {
+  background: rgba(30, 30, 30, 0.92);
+  border: 1px solid #404040;
+  border-radius: 6px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+.station-popup-wrap .maplibregl-popup-tip {
+  border-top-color: #404040;
+}
+
+.station-popup {
+  padding: 6px 10px;
+  min-width: 120px;
+}
+
+.sp-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #e0e0e0;
+}
+
+.sp-data {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-intensity {
+  font-size: 13px;
+  font-weight: 700;
+  width: 34px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* intensity-X::after injects text globally; suppress it inside the popup.
+   !important needed because intensity-0's :not() rule has ID-level specificity. */
+.sp-intensity::after { content: none !important; }
+
+.sp-pga {
+  font-size: 12px;
+  color: #bdbdbd;
+  white-space: nowrap;
+}

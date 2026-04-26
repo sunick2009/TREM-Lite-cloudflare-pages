@@ -114,6 +114,8 @@ export async function initMap(delay = 3000): Promise<void> {
         await loadIcons(map);
 
         state.map = map;
+        // Expose for debugging and e2e tests
+        (window as unknown as Record<string, unknown>)['__map'] = map;
         events.emit('MapLoad', { info: { type: 0 }, data: map });
         resolve();
       });

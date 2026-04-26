@@ -62,6 +62,7 @@ export function initRtsList(): void {
       },
     });
 
+    setupStationHover(map);
   });
 
   events.on<RtsData>('DataRts', (ans) => handleRts(ans.data));
@@ -107,9 +108,11 @@ function handleRts(data: RtsData | null): void {
 
     if (stData.pga > pga) pga = stData.pga;
 
+    const loc = search_loc_name(sLoc.code);
+    const stationName = loc ? `${loc.city}${loc.town}` : id;
+
     if (id === cfg.location.stationId) {
       const I = (alert && stData.alert) ? stData.I : stData.i;
-      const loc = search_loc_name(sLoc.code);
       if (loc) currentStationLoc.textContent = `${loc.city}${loc.town}`;
       currentStationPga.textContent = stData.pga.toFixed(2);
       const iInt = intensity_float_to_int(I);
@@ -126,14 +129,15 @@ function handleRts(data: RtsData | null): void {
 
     if (alert && stData.alert) {
       const I = intensity_float_to_int(stData.I);
+      const baseProp = { name: stationName, pga: stData.pga, iFloat: stData.I };
       if (state.cache.show_intensity || state.cache.show_lpgm) {
-        data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I } });
+        data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I, ...baseProp } });
       } else if (I > 0) {
-        data_alert_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I } });
+        data_alert_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I, ...baseProp } });
       } else if (eew_alert) {
-        data_alert_0_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: {} });
+        data_alert_0_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: 0, ...baseProp } });
       } else {
-        data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I } });
+        data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: I, ...baseProp } });
       }
       coordinates.push({ lon: sLoc.lon, lat: sLoc.lat });
       if (rts_max_pga < stData.pga) rts_max_pga = stData.pga;
@@ -164,7 +168,7 @@ function handleRts(data: RtsData | null): void {
         state.cache.audio.shindo = I;
       }
     } else if (!eew_alert) {
-      data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: stData.i } });
+      data_list.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [sLoc.lon, sLoc.lat] }, properties: { i: stData.i, name: stationName, pga: stData.pga, iFloat: stData.i } });
     }
   }
 
@@ -261,4 +265,46 @@ function intensityItem(i: number, loc: string): HTMLElement {
   location.textContent = loc;
   box.append(intensity, location);
   return box;
+}
+
+function setupStationHover(map: maplibregl.Map): void {
+  const popup = new maplibregl.Popup({
+    closeButton: false,
+    closeOnClick: false,
+    className: 'station-popup-wrap',
+    maxWidth: 'none',
+  });
+
+  type StationProps = { name?: string; pga?: number; iFloat?: number; i?: number };
+
+  const show = (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
+    if (!e.features?.length) return;
+    map.getCanvas().style.cursor = 'pointer';
+    const props = e.features[0].properties as StationProps;
+    const name = props.name ?? '';
+    const pga = Number(props.pga ?? 0);
+    const intensity = Number(props.iFloat ?? props.i ?? 0);
+    const iInt = intensity_float_to_int(intensity);
+    popup
+      .setLngLat(e.lngLat)
+      .setHTML(
+        `<div class="station-popup">` +
+        `<div class="sp-name">${name}</div>` +
+        `<div class="sp-data">` +
+        `<span class="sp-intensity intensity-${iInt}">${intensity.toFixed(1)}</span>` +
+        `<span class="sp-pga">${pga.toFixed(2)} gal</span>` +
+        `</div></div>`,
+      )
+      .addTo(map);
+  };
+
+  const hide = () => {
+    map.getCanvas().style.cursor = '';
+    popup.remove();
+  };
+
+  for (const layer of ['rts-layer', 'markers', 'markers-0'] as const) {
+    map.on('mousemove', layer, show);
+    map.on('mouseleave', layer, hide);
+  }
 }
