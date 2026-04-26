@@ -3,6 +3,7 @@ import { getConfig, patchConfig, resetConfig, exportConfig, importConfig } from 
 import { requestPermission, getPermission, isSupported as notifSupported } from '@web/services/notificationService.ts';
 import { AudioManager } from '@web/services/audioService.ts';
 import { APP_VERSION } from '@web/utils/constants.ts';
+import { getRegionSync } from '@web/utils/utils.ts';
 
 const PANEL_ID = 'settings-panel';
 
@@ -70,8 +71,8 @@ function injectSettingsPanel(): void {
 
         <section class="settings-section">
           <h3>所在地</h3>
-          <label>位置代碼 (location-code)
-            <input type="number" id="s-location-code" min="0" max="999">
+          <label>所在地區
+            <select id="s-location-code"></select>
           </label>
           <label>即時站 ID
             <input type="text" id="s-station-id">
@@ -105,6 +106,8 @@ function injectSettingsPanel(): void {
     </div>
   `;
   document.body.appendChild(panel);
+
+  buildLocationDropdown(panel);
 
   panel.querySelector('.settings-overlay')!.addEventListener('click', closeSettings);
   panel.querySelector('.settings-close-btn')!.addEventListener('click', closeSettings);
@@ -141,7 +144,7 @@ function injectSettingsPanel(): void {
   });
 
   // Auto-save on change
-  for (const id of ['s-api-domain', 's-location-code', 's-station-id']) {
+  for (const id of ['s-api-domain', 's-station-id', 's-location-code']) {
     panel.querySelector(`#${id}`)?.addEventListener('change', saveSettings);
   }
   for (const id of [
@@ -150,6 +153,25 @@ function injectSettingsPanel(): void {
     's-sfx-pga1', 's-sfx-pga2', 's-sfx-shindo0', 's-sfx-shindo1', 's-sfx-shindo2',
   ]) {
     panel.querySelector(`#${id}`)?.addEventListener('change', saveSettings);
+  }
+}
+
+function buildLocationDropdown(container: HTMLElement): void {
+  const select = container.querySelector<HTMLSelectElement>('#s-location-code');
+  if (!select) return;
+  const region = getRegionSync();
+  if (!region) return;
+  select.innerHTML = '';
+  for (const [city, towns] of Object.entries(region)) {
+    const group = document.createElement('optgroup');
+    group.label = city;
+    for (const [town, data] of Object.entries(towns)) {
+      const opt = document.createElement('option');
+      opt.value = String(data.code);
+      opt.textContent = `${town} (${data.code})`;
+      group.appendChild(opt);
+    }
+    select.appendChild(group);
   }
 }
 
@@ -180,7 +202,7 @@ function loadSettingsValues(): void {
   const speechEl = el<HTMLInputElement>('s-speech');
   if (speechEl) speechEl.checked = cfg.notification.speech;
 
-  const locationCode = el<HTMLInputElement>('s-location-code');
+  const locationCode = el<HTMLSelectElement>('s-location-code');
   if (locationCode) locationCode.value = String(cfg.location.code);
 
   const stationId = el<HTMLInputElement>('s-station-id');
@@ -220,7 +242,7 @@ async function saveSettings(): Promise<void> {
   const useProxy = el<HTMLInputElement>('s-use-proxy')?.checked ?? cfg.useProxy;
   const sound = el<HTMLInputElement>('s-sound')?.checked ?? cfg.notification.sound;
   const speechEnabled = el<HTMLInputElement>('s-speech')?.checked ?? cfg.notification.speech;
-  const locationCode = parseInt(el<HTMLInputElement>('s-location-code')?.value ?? String(cfg.location.code)) || cfg.location.code;
+  const locationCode = parseInt(el<HTMLSelectElement>('s-location-code')?.value ?? String(cfg.location.code)) || cfg.location.code;
   const stationId = el<HTMLInputElement>('s-station-id')?.value.trim() || cfg.location.stationId;
   const showTremEew = el<HTMLInputElement>('s-show-trem-eew')?.checked ?? cfg.display.showTremEew;
   const showFault = el<HTMLInputElement>('s-show-fault')?.checked ?? cfg.map.showFault;
@@ -251,6 +273,8 @@ async function saveSettings(): Promise<void> {
 
 export function openSettings(): void {
   const panel = document.getElementById(PANEL_ID)!;
+  const select = panel.querySelector<HTMLSelectElement>('#s-location-code');
+  if (select && select.options.length === 0) buildLocationDropdown(panel);
   loadSettingsValues();
   panel.classList.remove('hidden');
 }

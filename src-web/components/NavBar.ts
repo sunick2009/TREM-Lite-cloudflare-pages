@@ -4,6 +4,7 @@ import { now } from '@web/services/ntpService.ts';
 import { formatTime } from '@web/utils/utils.ts';
 import { LAST_DATA_TIMEOUT_ERROR, RECONNECT_GRACE_MS } from '@web/utils/constants.ts';
 import { getVisibleAt } from '@web/services/dataManager.ts';
+import { startGeolocation, getLastPosition } from '@web/services/geoLocation.ts';
 
 const timeEl = document.getElementById('time')!;
 const warningBoxInternet = document.getElementById('warning-box-internet')!;
@@ -38,11 +39,18 @@ export function initNavBar(): void {
     });
   }
 
-  // Focus button
+  // Focus button — triggers geolocation permission on first click (user gesture required
+  // by some browsers), then flies to position once available.
   const focusBtn = document.getElementById('focus');
   if (focusBtn) {
     focusBtn.addEventListener('click', () => {
-      events.emit('FocusLocation', { info: { type: 0 }, data: null });
+      startGeolocation();
+      if (getLastPosition()) {
+        events.emit('FocusLocation', { info: { type: 0 }, data: null });
+      } else {
+        // Position not yet available; MapManager will fly on next GeoLocation event
+        events.emit('FocusOnNextLocation', { info: { type: 0 }, data: null });
+      }
     });
   }
 }

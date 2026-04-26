@@ -3,9 +3,14 @@ import { getRegionSync, distance } from '@web/utils/utils.ts';
 import { patchConfig, getConfig } from './configStore.ts';
 
 let _lastPos: GeolocationCoordinates | null = null;
+let _watchId: number | null = null;
 
 export function getLastPosition(): GeolocationCoordinates | null {
   return _lastPos;
+}
+
+export function isGeolocationActive(): boolean {
+  return _watchId !== null;
 }
 
 function findNearestCode(lat: number, lon: number): number | null {
@@ -24,8 +29,8 @@ function findNearestCode(lat: number, lon: number): number | null {
 }
 
 export function startGeolocation(): void {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.watchPosition(
+  if (!navigator.geolocation || _watchId !== null) return;
+  _watchId = navigator.geolocation.watchPosition(
     (pos) => {
       _lastPos = pos.coords;
       events.emit('GeoLocation', { info: { type: 0 }, data: pos.coords });
@@ -38,7 +43,11 @@ export function startGeolocation(): void {
         }
       }
     },
-    null,
+    (err) => {
+      console.warn('[GeoLocation] error:', err.message);
+      // Reset so user can retry (e.g. by clicking the focus button again)
+      _watchId = null;
+    },
     { enableHighAccuracy: false, timeout: 10_000 },
   );
 }

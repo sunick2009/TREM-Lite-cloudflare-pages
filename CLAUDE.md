@@ -68,6 +68,17 @@ e2e/                        # Playwright 測試
 - GeoJSON feature properties 包含 `{ i, name, pga, iFloat }` 給 popup 使用
 - Popup 掛在 `rts-layer`、`markers`、`markers-0` 三個 layer 的 mousemove/mouseleave
 
+### 定位按鈕（focus button）設計
+- 定位按鈕**不在頁面載入時自動請求權限**；`startGeolocation()` 已加入 `_watchId` guard 防重複呼叫
+- 點擊後：呼叫 `startGeolocation()`（user gesture 確保瀏覽器彈出權限請求）→ 若位置已知立刻 fly，否則發出 `FocusOnNextLocation` 事件
+- MapManager 監聽 `FocusOnNextLocation`，用 `events.once('GeoLocation')` 等第一筆定位後自動 fly
+- 權限被拒 / timeout 時 error callback 重置 `_watchId`，使用者下次點擊可再次觸發請求
+
+### 設定面板：所在地 Dropdown
+- 「位置代碼」欄位改為 `<select>`，以 `getRegionSync()` 資料建立，按縣市 `<optgroup>` 分組
+- 選項格式：`區鄉名 (代碼)`，例如 `中正區 (202)`
+- 開啟設定面板時若 options 尚未建立（region 尚未載入），自動呼叫 `buildLocationDropdown()` 補建
+
 ---
 
 ## 開發指令

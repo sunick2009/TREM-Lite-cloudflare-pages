@@ -185,6 +185,14 @@ export async function initMap(delay = 3000): Promise<void> {
           if (pos) map.flyTo({ center: [pos.longitude, pos.latitude], zoom: 10 });
         });
 
+        // When focus was clicked before position was available, fly on first fix
+        events.on('FocusOnNextLocation', () => {
+          events.once('GeoLocation', (ans) => {
+            const coords = (ans as TremEventPayload<GeolocationCoordinates>).data;
+            map.flyTo({ center: [coords.longitude, coords.latitude], zoom: 10 });
+          });
+        });
+
         // Fault lines — loaded from local GeoJSON to avoid CORS
         map.addSource('fault-geojson', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         map.addLayer({

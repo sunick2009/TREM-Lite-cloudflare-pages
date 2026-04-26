@@ -1318,7 +1318,8 @@ body {
 }
 
 .settings-section label input[type="text"],
-.settings-section label input[type="number"] {
+.settings-section label input[type="number"],
+.settings-section label select {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -1328,9 +1329,16 @@ body {
 }
 
 .settings-section label input[type="text"]:focus,
-.settings-section label input[type="number"]:focus {
+.settings-section label input[type="number"]:focus,
+.settings-section label select:focus {
   outline: none;
   border-color: var(--primary);
+}
+
+.settings-section label select option,
+.settings-section label select optgroup {
+  background: var(--bg, #1a1a1a);
+  color: var(--light);
 }
 
 .checkbox-row {
