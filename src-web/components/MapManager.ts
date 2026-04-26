@@ -164,13 +164,20 @@ export async function initMap(delay = 3000): Promise<void> {
           }, 15_000);
         });
 
-        events.on('GeoLocation', (ans) => {
-          const coords = (ans as TremEventPayload<GeolocationCoordinates>).data;
+        const setUserLocation = (coords: GeolocationCoordinates) => {
           (map.getSource('user-location') as GeoJSONSource).setData({
             type: 'FeatureCollection',
             features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [coords.longitude, coords.latitude] }, properties: {} }],
           });
+        };
+
+        events.on('GeoLocation', (ans) => {
+          setUserLocation((ans as TremEventPayload<GeolocationCoordinates>).data);
         });
+
+        // Apply immediately if geolocation already fired before MapLoad
+        const existingPos = getLastPosition();
+        if (existingPos) setUserLocation(existingPos);
 
         events.on('FocusLocation', () => {
           const pos = getLastPosition();

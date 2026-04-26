@@ -3,7 +3,8 @@ import './styles/main.css';
 
 import { loadConfig } from './services/configStore.ts';
 import { loadRegionData } from './utils/utils.ts';
-import { loadStation, startStationRefresh } from './services/stationResource.ts';
+import { loadStation, startStationRefresh, getStation } from './services/stationResource.ts';
+import { events } from './services/eventBus.ts';
 import { startNtpSync } from './services/ntpService.ts';
 import { init as initNotification } from './services/notificationService.ts';
 import { init as initSpeech } from './services/speechService.ts';
@@ -15,7 +16,7 @@ import { initReportList } from './components/ReportList.ts';
 import { initNavBar } from './components/NavBar.ts';
 import { initAudioController } from './components/AudioController.ts';
 import { initSettings } from './components/Settings.ts';
-import { startGeolocation } from './services/geoLocation.ts';
+import { startGeolocation, getLastPosition } from './services/geoLocation.ts';
 
 async function main(): Promise<void> {
   console.log('[TREM Web] Starting...');
@@ -52,6 +53,12 @@ async function main(): Promise<void> {
 
   // Start data polling loop
   startDataLoop();
+
+  // Expose internals for e2e tests and debugging (same pattern as __map)
+  const w = window as unknown as Record<string, unknown>;
+  w['__events'] = events;
+  w['__getStation'] = getStation;
+  w['__getLastPosition'] = getLastPosition;
 
   // Init map (emits 'MapLoad' when ready, which triggers data loop start)
   await initMap();
