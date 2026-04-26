@@ -410,7 +410,7 @@ body {
 .info-time::after { content: "發震"; }
 
 .info-mag-text::after,
-.report-box-item-wrapper:first-child .report-mag-text::after { content: "規模"; }
+.report-mag-text::after { content: "規模"; }
 
 .info-depth-text::after,
 .report-depth-text::after { content: "深度"; }
@@ -954,10 +954,13 @@ body {
 .report-mag-dep .report-mag,
 .report-mag-dep .report-depth {
   position: relative;
-  display: flex;
   gap: 4px;
   height: 28px;
   isolation: isolate;
+}
+
+.report-mag-dep .report-mag {
+  display: flex;
 }
 
 .report-mag-dep .report-mag-text,

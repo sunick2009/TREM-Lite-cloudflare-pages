@@ -106,10 +106,15 @@ async function refresh(map: maplibregl.Map, container: HTMLElement, scrollbar: H
     state.data.report = list;
     // Only alert if this report wasn't already seen before the page reload.
     // Guards against SW-update reloads replaying audio for old reports.
+    // Secondary guard: suppress alerts on page load for reports older than 1 minute,
+    // so stale data never triggers audio/notification on refresh.
     const lastSeenId = localStorage.getItem(LAST_SEEN_REPORT_KEY);
     if (list[0].id !== lastSeenId) {
-      events.emit('ReportRelease', { info: { type: 0 }, data: list[0] });
       localStorage.setItem(LAST_SEEN_REPORT_KEY, list[0].id);
+      const isRecent = Date.now() - list[0].time < 60_000;
+      if (isRecent) {
+        events.emit('ReportRelease', { info: { type: 0 }, data: list[0] });
+      }
     }
   } else if (list.length && list[0].id !== state.data.report[0]?.id) {
     const detail = await fetchReportDetail(list[0].id);
