@@ -61,17 +61,27 @@ npm run test:e2e:proxy
 
 ## 部署至 Cloudflare Pages
 
-### 首次設定
+### 快速部署（Fork 後）
+
+1. **Fork 此 repo**，切換至 `feat/cloudflare-pages` 分支
+2. 在本機執行：
 
 ```bash
-# 登入 Cloudflare
-npx wrangler login
-
-# 建置並部署（會自動建立 Pages 專案）
-npm run deploy:pages
+npm install
+npm run build:web           # TypeScript 型別檢查 + Vite 建置 → dist/
+npx wrangler login          # 登入 Cloudflare 帳號
+npx wrangler pages deploy dist --project-name=trem-lite-web
 ```
 
-### CI/CD
+或直接到 [Cloudflare Pages Dashboard](https://dash.cloudflare.com/) → **Create a project** → 連結你 fork 的 GitHub repo，設定：
+
+| 項目 | 值 |
+|------|-----|
+| Build command | `npm run build:web` |
+| Build output directory | `dist` |
+| Root directory | （留空） |
+
+### CI/CD（GitHub Actions）
 
 推送至 `feat/cloudflare-pages` 分支後，GitHub Actions 會自動執行：
 1. TypeScript 型別檢查
