@@ -87,6 +87,9 @@ export const HTTP_TIMEOUT = {
 };
 
 export const LAST_DATA_TIMEOUT_ERROR = 3000;
+// Grace period after tab becomes visible before showing the "no network" warning.
+// Gives the first reconnect fetch time to complete without false alarms.
+export const RECONNECT_GRACE_MS = 5000;
 
 export const URL_CONFIG = {
   API: ['api-1.exptech.dev', 'api-2.exptech.dev'],

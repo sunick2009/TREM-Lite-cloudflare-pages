@@ -8,6 +8,10 @@ import { state } from './appState.ts';
 let fetchInterval: ReturnType<typeof setInterval> | null = null;
 let lastFetchTime = 0;
 let mapReady = false;
+// Timestamp when the tab last became visible; used for reconnect grace period.
+let visibleAt = 0;
+
+export function getVisibleAt(): number { return visibleAt; }
 
 export function startDataLoop(): void {
   events.on('MapLoad', () => {
@@ -17,6 +21,17 @@ export function startDataLoop(): void {
     fetchInterval = setInterval(async () => {
       await fetchData();
     }, 100);
+  });
+
+  // Browser timer throttling freezes polling when the tab is in the background
+  // (Chrome 88+: timers can slow to once per minute after ~5 min of inactivity).
+  // On visibility restore, trigger an immediate fetch so data recovers quickly.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    visibleAt = Date.now();
+    if (!mapReady) return;
+    lastFetchTime = 0; // bypass throttle gate
+    fetchData();
   });
 }
 

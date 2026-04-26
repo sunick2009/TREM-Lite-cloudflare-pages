@@ -126,3 +126,17 @@ Tooltip 測試策略：透過 `window.__map` 取得地圖，用 `getSource('rts'
 - [ ] LPGM 圖層（資料有 fetch，layer 未加）
 - [ ] 離線支援最佳化（Service Worker precache 已設定）
 - [ ] 響應式行動版調整
+
+### WebSocket 即時連線（重要，待實作）
+
+**問題**：Web 版目前用 HTTP polling（`setInterval` 1s），瀏覽器對背景 tab 的 timer 節流政策
+（Chrome 88+）會導致 tab 閒置超過 5 分鐘後 fetch 幾乎停止，警報功能失效。
+
+**解法**：改用 WebSocket 持久連線。OS 層 socket 不受 timer 節流影響，Teams/Slack 等均採此方案。
+
+**ExpTech 現況**：
+- Electron 版 `constant.js` 已有 `// 0 realtime (http) | 1 realtime (websocket)` 模式設計
+- WebSocket API endpoint 格式尚未完成設計，**待 ExpTech 團隊確認後實作**
+- 實作時建議在 `dataManager.ts` 新增 WebSocket 連線層，保留 HTTP polling 作為 fallback
+
+**暫行緩解**（已實作）：`visibilitychange` 事件偵測，使用者切回 tab 時立即重連 + 5 秒緩衝期。
