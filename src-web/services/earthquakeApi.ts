@@ -11,6 +11,11 @@ const IS_LOCALHOST =
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
+// api.core.exptech.dev only allows requests from official ExpTech origins.
+// For other deployments (e.g. *.pages.dev), skip it and go straight to the tyo1 mirror.
+const IS_EXPTECH_ORIGIN =
+  typeof window !== 'undefined' && window.location.hostname.endsWith('.exptech.dev');
+
 function apiUrl(domain: string, path: string): string {
   const full = `https://${domain}${path}`;
   if (USE_PROXY || getConfig().useProxy) {
@@ -107,10 +112,16 @@ export async function fetchReportList(limit = 75): Promise<ReportListItem[] | nu
   if (IS_LOCALHOST) {
     return fetchWithTimeout<ReportListItem[]>(`/local-api/api/v2/eq/report?limit=${limit}`, 5000);
   }
+  if (IS_EXPTECH_ORIGIN) {
+    return fetchWithTimeout<ReportListItem[]>(
+      apiUrl('api.core.exptech.dev', `/api/v2/eq/report?limit=${limit}`),
+      5000,
+      [apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report?limit=${limit}`)],
+    );
+  }
   return fetchWithTimeout<ReportListItem[]>(
-    apiUrl('api.core.exptech.dev', `/api/v2/eq/report?limit=${limit}`),
+    apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report?limit=${limit}`),
     5000,
-    [apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report?limit=${limit}`)],
   );
 }
 
@@ -118,10 +129,16 @@ export async function fetchReportDetail(id: string): Promise<ReportDetail | null
   if (IS_LOCALHOST) {
     return fetchWithTimeout<ReportDetail>(`/local-api/api/v2/eq/report/${id}`, 5000);
   }
+  if (IS_EXPTECH_ORIGIN) {
+    return fetchWithTimeout<ReportDetail>(
+      apiUrl('api.core.exptech.dev', `/api/v2/eq/report/${id}`),
+      5000,
+      [apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report/${id}`)],
+    );
+  }
   return fetchWithTimeout<ReportDetail>(
-    apiUrl('api.core.exptech.dev', `/api/v2/eq/report/${id}`),
+    apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report/${id}`),
     5000,
-    [apiUrl('api.core-tyo1.exptech.dev', `/api/v2/eq/report/${id}`)],
   );
 }
 
